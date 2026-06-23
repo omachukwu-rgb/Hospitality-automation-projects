@@ -8,4 +8,7 @@ I am a Hospitality Automation Specialist who helps the hospitality industry elim
  - WhatsApp Automation
  - Workflow Design
  - API Integrations
-## Projects
+## Current Projects
+- Hotel Review Management Automation
+- Whatsapp Reservation Assistant
+- Guest Communication
