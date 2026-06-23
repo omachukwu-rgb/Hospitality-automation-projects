@@ -1,0 +1,513 @@
+{
+  "name": "HOTEL WORKFORCE ASSISTANT",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1904,
+        -80
+      ],
+      "id": "6d37c47f-3a2b-4988-9d12-8070732e544f",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://api.airtable.com/v0/appkj16lLh8BUkR3Y/tblzLapfVwMjff5ks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer patMNb6BX2Gzj64zu.a9554aa1f4b0f5329cc9d2926b49bbb7aa9bc7093cb6bc264226993b100160a0"
+            },
+            {
+              "name": "Content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1648,
+        -240
+      ],
+      "id": "9b58d340-4df8-4120-b90c-9b27fc00ac12",
+      "name": "Pulls Employee Data"
+    },
+    {
+      "parameters": {
+        "url": "https://api.airtable.com/v0/appkj16lLh8BUkR3Y/tblJe4Ihf9Zq7VrdD",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer patMNb6BX2Gzj64zu.a9554aa1f4b0f5329cc9d2926b49bbb7aa9bc7093cb6bc264226993b100160a0"
+            },
+            {
+              "name": "Content-type",
+              "value": "Application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1632,
+        64
+      ],
+      "id": "cc98f25d-ebb9-419c-9e1d-0f13fdd5db25",
+      "name": "Pulls Coverages Data"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "records",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        -240
+      ],
+      "id": "e8bd2317-a895-4b59-b78e-7cd38794ab41",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1344,
+        64
+      ],
+      "id": "4c4df7e5-c5ed-4fb4-857a-25b59751d4e6",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7de7aa93-3b71-49d6-abc2-6aae5eb3cb6a",
+              "leftValue": "={{ $json.fields.Department }}",
+              "rightValue": "={{ $json.records[0].fields.Department }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "19a80bc3-acc1-4cf1-a30c-8ce02a6a123b",
+              "leftValue": "={{ $json.fields.Position }}",
+              "rightValue": "={{ $json.records[0].fields.Position }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "ebc8f7aa-d73d-4270-9627-91171e60602a",
+              "leftValue": "={{ $json.fields.Available }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1088,
+        64
+      ],
+      "id": "a248f9c7-22c2-40b8-9412-d0fbe9bca778",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4aeee9d-6f9a-412c-be05-08859c441d42",
+              "name": "Coverage Report",
+              "value": "={{\n\"TOP COVERAGE RECOMMENDATIONS\\n\\n\" +\n$json.Recommendation.map((item, index) =>\n(index + 1) + \". \" + item\n).join(\"\\n\\n\")\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        272
+      ],
+      "id": "2bc1c9fd-9ee6-4f2c-b701-1b721450fd05",
+      "name": "Build coverage report"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "Recommendation",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        48
+      ],
+      "id": "85cedb60-925b-4dfd-b269-22a22dcac2ba",
+      "name": "Sort by highest shift coverage available"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "Recommendation"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        272
+      ],
+      "id": "a592d01b-bf79-445d-85f6-016d1737b9b3",
+      "name": "Aggregate the output to a cool report style."
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        272
+      ],
+      "id": "3d1a20da-d115-4f69-ae49-549c96578800",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "14231ad5-6104-4277-aad4-cad5cc716611",
+              "name": "Remaining Hours",
+              "value": "={{ Number($json.fields[\"Max Weekly Hours\"]) - Number($json.fields[\"Hours Worked This Week\"]) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -976,
+        -240
+      ],
+      "id": "cf83826f-1f51-4a4c-ad31-003523df4d46",
+      "name": "Edit field for Hours remaining for work"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f8905a94-794d-47cf-9f6a-1411b6cd3627",
+              "name": "Hours after assignment",
+              "value": "={{ Number($json[\"Remaining Hours\"]) - 4 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -752,
+        -240
+      ],
+      "id": "66107ebb-222f-4d6e-95c9-e6d391f17486",
+      "name": "Remaining hours after open shift assignment"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c5dfe9db-bada-463d-8af6-22884cb4b628",
+              "name": "Recommendation",
+              "value": "={{ \"Recommended Candidate: \" + $json.fields[\"Name\"] + \" | Position: \" + $json.fields[\"Position\"] + \" | Remaining Hours: \" + $json[\"Remaining Hours\"] + \" | Overtime Risk: \" + $json[\"Over time risk\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -352,
+        -240
+      ],
+      "id": "360fe58e-801d-45ab-92ae-d7d93168025b",
+      "name": "Recommend staff based on system logic"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ec589f06-eb54-4f53-9962-8a202cc2f6d7",
+              "name": "Over time risk",
+              "value": "={{ Number($json[\"Hours after assignment\"]) < 0 ? \"HIGH\" : \"LOW\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -560,
+        -240
+      ],
+      "id": "104cc86c-a1f0-45d2-b29a-5cacf70bcadc",
+      "name": "Rank for Over time risk on \"LOW/HIGH\""
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "69b7f45c-d2bb-47f6-a0a9-40c1c6cf0d25",
+              "name": "Assignment Recommendation",
+              "value": "={{ \"Recommendation\\n\\n\" + $json.fields[\"Name\"] + \"\\n\\nReason:\\n\" + \"✓ Qualified \" + $json.fields[\"Position\"] + \"\\n✓ Available\" + \"\\n✓ Remaining Hours: \" + $json[\"Remaining Hours\"] + \"\\n✓ Overtime Risk: \" + $json[\"Over time risk\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -496,
+        48
+      ],
+      "id": "73da197b-9a8a-41de-9116-8a50c2e069c7",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Pulls Employee Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pulls Coverages Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pulls Employee Data": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pulls Coverages Data": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit field for Hours remaining for work",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort by highest shift coverage available": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate the output to a cool report style.": {
+      "main": [
+        [
+          {
+            "node": "Build coverage report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit field for Hours remaining for work": {
+      "main": [
+        [
+          {
+            "node": "Remaining hours after open shift assignment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remaining hours after open shift assignment": {
+      "main": [
+        [
+          {
+            "node": "Rank for Over time risk on \"LOW/HIGH\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recommend staff based on system logic": {
+      "main": [
+        [
+          {
+            "node": "Sort by highest shift coverage available",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rank for Over time risk on \"LOW/HIGH\"": {
+      "main": [
+        [
+          {
+            "node": "Recommend staff based on system logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Aggregate the output to a cool report style.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4dd16d82-ab30-4ebd-af59-06784d5921bb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c27d3cea316f10037f1c4484d514870ba85c84e72aa95083b9a4701443725690"
+  },
+  "id": "DFqe56Wn7Ze5QPgL",
+  "tags": []
+}
